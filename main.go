@@ -17,30 +17,33 @@ type Wallet struct {
 
 func main() {
 
-	wif, err := networks["btc"].CreatePrivateKey()
-	if err != nil {
-		log.Fatal(err)
+	//createWalletFolder("wallets")
+
+	numWallets := 10
+	for i := 1; i < numWallets; i++ {
+		wif, err := networks["btc"].CreatePrivateKey()
+		if err != nil {
+			log.Fatal(err)
+		}
+		pk := wif.String()
+
+		address, err := networks["btc"].GetAddress(wif)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(color.CyanString("PublicKey: "), color.YellowString(address.EncodeAddress()))
+		fmt.Println(color.CyanString("PrivateKey: "), color.YellowString(pk))
+
+		wallet := Wallet{
+			PublicKey:  address.EncodeAddress(),
+			PrivateKey: pk,
+		}
+
+		file, _ := json.MarshalIndent(wallet, "", " ")
+		_ = ioutil.WriteFile("wallets/"+address.EncodeAddress()+".json", file, 0644)
+		fmt.Println("")
 	}
-	pk := wif.String()
-
-	address, err := networks["btc"].GetAddress(wif)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	createWalletFolder("wallets")
-
-	fmt.Println(color.CyanString("PublicKey: "), color.YellowString(address.EncodeAddress()))
-	fmt.Println(color.CyanString("PrivateKey: "), color.YellowString(pk))
-
-	wallet := Wallet{
-		PublicKey:  address.EncodeAddress(),
-		PrivateKey: pk,
-	}
-
-	file, _ := json.MarshalIndent(wallet, "", " ")
-	_ = ioutil.WriteFile("wallets/"+address.EncodeAddress()+".json", file, 0644)
-
 }
 
 func createWalletFolder(dirname string) bool {
